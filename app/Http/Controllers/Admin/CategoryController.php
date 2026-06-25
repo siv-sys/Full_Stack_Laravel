@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -32,6 +33,8 @@ class CategoryController extends Controller
         }
 
         Category::create($data);
+        Cache::forget('categories:all');
+        Cache::increment('products:version');
 
         return redirect()->route('admin.categories.index')->with('success', 'Category created.');
     }
@@ -54,6 +57,8 @@ class CategoryController extends Controller
         }
 
         $category->update($data);
+        Cache::forget('categories:all');
+        Cache::increment('products:version');
 
         return redirect()->route('admin.categories.index')->with('success', 'Category updated.');
     }
@@ -65,6 +70,8 @@ class CategoryController extends Controller
         }
 
         $category->delete();
+        Cache::forget('categories:all');
+        Cache::increment('products:version');
 
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted.');
     }

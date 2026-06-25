@@ -7,6 +7,34 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Production Deployment
+
+For production, run behind **Nginx + PHP-FPM** (not `php artisan serve`):
+
+```bash
+# Optimized deploy
+composer install --optimize-autoloader --no-dev
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+```
+
+Enable **OPcache** in `php.ini`:
+```ini
+opcache.enable=1
+opcache.memory_consumption=256
+opcache.max_accelerated_files=20000
+opcache.validate_timestamps=0
+```
+
+Enable **GD extension** in `php.ini` for product thumbnail generation:
+```ini
+extension=gd
+```
+
+For local development with concurrent requests, use [Laragon](https://laragon.org/) (Windows) or [Herd](https://herd.laravel.com/) instead of `php artisan serve`. If using `artisan serve`, set `PHP_CLI_SERVER_WORKERS=4` in `.env`.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

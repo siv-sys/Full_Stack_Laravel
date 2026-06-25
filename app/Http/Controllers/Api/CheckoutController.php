@@ -25,13 +25,33 @@ class CheckoutController extends Controller
 
         try {
             $order = DB::transaction(function () use ($user, $cartItems) {
-                $total = 0;
+                $productIds = $cartItems->pluck('product_id')->all();
+                $products = Product::whereIn('id', $productIds)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
+                $unavailable = [];
                 foreach ($cartItems as $item) {
-                    if ($item->product->stock < $item->quantity) {
-                        throw new \Exception("Insufficient stock for {$item->product->name}. Available: {$item->product->stock}");
+                    $product = $products->get($item->product_id);
+                    if (!$product || $product->stock < $item->quantity) {
+                        $unavailable[] = [
+                            'product' => $product ? $product->name : "Product #{$item->product_id}",
+                            'requested' => $item->quantity,
+                            'available' => $product ? $product->stock : 0,
+                        ];
                     }
                 }
+
+                if (!empty($unavailable)) {
+                    $messages = array_map(
+                        fn($u) => "{$u['product']} (requested: {$u['requested']}, available: {$u['available']})",
+                        $unavailable
+                    );
+                    throw new \Exception('Insufficient stock for: ' . implode('; ', $messages));
+                }
+
+                $total = 0;
 
                 $order = Order::create([
                     'user_id' => $user->id,
@@ -40,7 +60,8 @@ class CheckoutController extends Controller
                 ]);
 
                 foreach ($cartItems as $item) {
-                    $unitPrice = $item->product->price;
+                    $product = $products->get($item->product_id);
+                    $unitPrice = $product->price;
 
                     $order->items()->create([
                         'product_id' => $item->product_id,
@@ -48,8 +69,7 @@ class CheckoutController extends Controller
                         'unit_price' => $unitPrice,
                     ]);
 
-                    Product::where('id', $item->product_id)
-                        ->decrement('stock', $item->quantity);
+                    $product->decrement('stock', $item->quantity);
 
                     $total += $item->quantity * $unitPrice;
                 }

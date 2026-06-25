@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect("/admin/login");    
 });
 
 // Admin auth
@@ -26,6 +26,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::resource('users', UserController::class);
+    Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });

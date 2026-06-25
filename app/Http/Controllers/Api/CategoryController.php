@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
@@ -13,7 +14,9 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::all();
+        $categories = Cache::remember('categories:all', 3600, function () {
+            return Category::orderBy('name')->get();
+        });
 
         return $this->success(CategoryResource::collection($categories), 'Categories retrieved.');
     }

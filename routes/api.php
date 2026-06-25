@@ -18,11 +18,13 @@ Route::prefix('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
 
-// Public API
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{idOrSlug}', [ProductController::class, 'show']);
-Route::get('/products/{product}/reviews', [ReviewController::class, 'index']);
+// Public API (ETag caching only on stateless public reads)
+Route::middleware('cache.etag')->group(function () {
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{idOrSlug}', [ProductController::class, 'show']);
+    Route::get('/products/{product}/reviews', [ReviewController::class, 'index']);
+});
 
 // Protected API
 Route::middleware('auth:sanctum')->group(function () {

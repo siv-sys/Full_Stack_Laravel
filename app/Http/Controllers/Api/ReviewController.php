@@ -18,11 +18,11 @@ class ReviewController extends Controller
     {
         $product = Product::findOrFail($productId);
 
-        $perPage = $request->input('per_page', 15);
+        $perPage = min((int) $request->input('per_page', 12), 50);
 
         $reviews = $product->reviews()
-            ->with('user')
-            ->orderBy('created_at', 'desc')
+            ->with('user:id,name')
+            ->latest()
             ->paginate($perPage);
 
         return response()->json([

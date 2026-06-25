@@ -13,12 +13,12 @@ class OrderController extends Controller
 
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 15);
+        $perPage = min((int) $request->input('per_page', 12), 50);
 
         $orders = $request->user()
             ->orders()
-            ->with('items.product')
-            ->orderBy('created_at', 'desc')
+            ->with('items.product:id,category_id,name,slug,price,stock,image')
+            ->latest()
             ->paginate($perPage);
 
         return response()->json([

@@ -13,13 +13,13 @@ class DashboardController extends Controller
     public function index()
     {
         $stats = [
-            'users' => User::count(),
-            'products' => Product::count(),
-            'categories' => Category::count(),
-            'orders' => Order::count(),
-            'total_sales' => Order::sum('total'),
+            'users'          => User::count(),
+            'products'       => Product::count(),
+            'categories'     => Category::count(),
+            'orders'         => Order::count(),
+            'total_sales'    => (float) Order::sum('total'),
             'pending_orders' => Order::where('status', 'pending')->count(),
-            'recent_orders' => Order::with('user')->orderBy('created_at', 'desc')->limit(5)->get(),
+            'recent_orders'  => Order::with('user')->latest()->limit(5)->get(),
         ];
 
         return view('admin.dashboard', compact('stats'));
