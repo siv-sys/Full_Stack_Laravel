@@ -72,6 +72,12 @@ class ProductController extends Controller
                 Storage::disk('public')->delete('products/thumbs/' . basename($product->image));
             }
             $data['image'] = $request->input('image_url');
+        } elseif ($request->input('remove_image') === '1') {
+            if ($product->image && !str_starts_with($product->image, 'http')) {
+                Storage::disk('public')->delete($product->image);
+                Storage::disk('public')->delete('products/thumbs/' . basename($product->image));
+            }
+            $data['image'] = null;
         }
 
         unset($data['image_url']);

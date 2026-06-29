@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Import necessary controllers for API routes
+ */
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CheckoutController;
@@ -55,15 +58,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products/{product}/reviews', [ReviewController::class, 'store']);
 
     // Admin
+/**
+ * Admin routes group with middleware
+ * All routes in this group require authentication and admin privileges
+ */
     Route::middleware('admin')->group(function () {
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::put('/products/{id}', [ProductController::class, 'update']);
-        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 
-        Route::get('/users', [UserController::class, 'index']);
-        Route::post('/users', [UserController::class, 'store']);
-        Route::get('/users/{user}', [UserController::class, 'show']);
-        Route::put('/users/{user}', [UserController::class, 'update']);
-        Route::delete('/users/{user}', [UserController::class, 'destroy']);
+    /**
+     * Product routes
+     * These routes handle CRUD operations for products
+     */
+        Route::post('/products', [ProductController::class, 'store']);    // Create a new product
+        Route::put('/products/{id}', [ProductController::class, 'update']); // Update an existing product
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']); // Delete a product
+
+
+
+    /**
+     * User routes
+     * These routes handle CRUD operations for users
+     */
+        Route::get('/users', [UserController::class, 'index']);     // Get all users
+        Route::post('/users', [UserController::class, 'store']);    // Create a new user
+        Route::get('/users/{user}', [UserController::class, 'show']); // Get a specific user
+        Route::put('/users/{user}', [UserController::class, 'update']); // Update a user
+        Route::delete('/users/{user}', [UserController::class, 'destroy']); // Delete a user
     });
 });

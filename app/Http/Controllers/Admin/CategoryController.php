@@ -30,7 +30,11 @@ class CategoryController extends Controller
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('categories', 'public');
+        } elseif ($request->filled('image_url')) {
+            $data['image'] = $request->input('image_url');
         }
+
+        unset($data['image_url']);
 
         Category::create($data);
         Cache::forget('categories:all');
@@ -50,11 +54,23 @@ class CategoryController extends Controller
         $data['slug'] = Str::slug($data['name']);
 
         if ($request->hasFile('image')) {
-            if ($category->image) {
+            if ($category->image && !str_starts_with($category->image, 'http')) {
                 Storage::disk('public')->delete($category->image);
             }
             $data['image'] = $request->file('image')->store('categories', 'public');
+        } elseif ($request->filled('image_url')) {
+            if ($category->image && !str_starts_with($category->image, 'http')) {
+                Storage::disk('public')->delete($category->image);
+            }
+            $data['image'] = $request->input('image_url');
+        } elseif ($request->input('remove_image') === '1') {
+            if ($category->image && !str_starts_with($category->image, 'http')) {
+                Storage::disk('public')->delete($category->image);
+            }
+            $data['image'] = null;
         }
+
+        unset($data['image_url']);
 
         $category->update($data);
         Cache::forget('categories:all');

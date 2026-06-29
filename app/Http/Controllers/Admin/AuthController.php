@@ -20,9 +20,14 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Attempt to authenticate the user with the provided credentials
+        // The 'remember' parameter determines if the user should be remembered (kept logged in) across sessions
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            // Check if the authenticated user is not an admin
             if (!Auth::user()->is_admin) {
+                // If the user is not an admin, log them out immediately
                 Auth::logout();
+                // Return back with an error message indicating admin access is required
                 return back()->withErrors(['email' => 'Access denied. Admin only.']);
             }
 
